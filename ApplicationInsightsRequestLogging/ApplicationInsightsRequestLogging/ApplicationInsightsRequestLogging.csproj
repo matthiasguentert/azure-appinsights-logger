@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Azureblue.ApplicationInsights.RequestLogging</RootNamespace>
+
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageId>Azureblue.ApplicationInsights.RequestLogging</PackageId>
+	<Authors>Matthias Güntert</Authors>
+	<Company></Company>
+	<Product>Azureblue.ApplicationInsights.RequestLogging</Product>
+	<Description>This package provides an ASP.NET Core middleware that brings HTTP request &amp; response body logging to Application Insights, by enriching telemetry data with custom dimensions.</Description>
+	<AssemblyName>AppInsightsRequestLogging</AssemblyName>
+	<DebugType>embedded</DebugType>
+	<Copyright>Copyright (c) Matthias Güntert 2021</Copyright>
+	<Version>1.0.2</Version>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<PackageProjectUrl>https://github.com/matthiasguentert/ApplicationInsightsRequestLogging</PackageProjectUrl>
+	<RepositoryUrl>https://github.com/matthiasguentert/ApplicationInsightsRequestLogging</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageTags>middleware; asp.net core; logging; application insights</PackageTags>
+	<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>	  
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.18.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>
