@@ -4,6 +4,8 @@
 
 This nuget package provides a custom middleware that allows to write the body of an HTTP request/response to a custom dimension. 
 
+![](https://i.imgur.com/0fxsnKN.png)
+
 ## Installation 
 
 Just pull in the nuget package like so: 
