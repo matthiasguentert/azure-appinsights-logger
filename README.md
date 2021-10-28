@@ -25,6 +25,10 @@ dotnet add package Azureblue.ApplicationInsights.RequestLogging
 Then you'll have to register the middleware in your `Startup` class with your container. 
 
 ```
+using Azureblue.ApplicationInsights.RequestLogging;
+
+// ...
+
 public void ConfigureServices(IServiceCollection services)
 {
     // ...
