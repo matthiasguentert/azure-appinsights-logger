@@ -20,7 +20,7 @@
 	<RepositoryUrl>https://github.com/matthiasguentert/ApplicationInsightsRequestLogging</RepositoryUrl>
 	<RepositoryType>git</RepositoryType>
 	<PackageTags>middleware; asp.net core; logging; application insights</PackageTags>
-	<PackageLicenseFile>C:\Dev\Repos\ApplicationInsightsRequestLogging\LICENSE</PackageLicenseFile>	  
+	<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>	  
   </PropertyGroup>
 
   <ItemGroup>
