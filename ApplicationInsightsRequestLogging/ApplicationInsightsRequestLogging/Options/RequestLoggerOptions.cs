@@ -1,4 +1,4 @@
-﻿namespace Azureblue.ApplicationInsights.RequestLogging.Options
+﻿namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public class RequestLoggerOptions
     {

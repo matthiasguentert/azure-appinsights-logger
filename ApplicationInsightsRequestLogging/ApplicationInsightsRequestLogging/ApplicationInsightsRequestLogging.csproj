@@ -14,7 +14,7 @@
 	<AssemblyName>AppInsightsRequestLogging</AssemblyName>
 	<DebugType>embedded</DebugType>
 	<Copyright>Copyright (c) Matthias Güntert 2021</Copyright>
-	<Version>1.0.1</Version>
+	<Version>1.0.2</Version>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
 	<PackageProjectUrl>https://github.com/matthiasguentert/ApplicationInsightsRequestLogging</PackageProjectUrl>
 	<RepositoryUrl>https://github.com/matthiasguentert/ApplicationInsightsRequestLogging</RepositoryUrl>

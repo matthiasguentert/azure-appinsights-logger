@@ -1,7 +1,6 @@
-﻿using Azureblue.ApplicationInsights.RequestLogging.Options;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Azureblue.ApplicationInsights.RequestLogging.Extensions
+namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public static class ServiceCollectionExtensions
     {

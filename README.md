@@ -39,14 +39,12 @@ public void ConfigureServices(IServiceCollection services)
         ContentType = "application/json",
         Path = "/"
     });
-    services.AddRequestLogging(new RequestLoggerOptions
+    services.AddResponseLogging(new ResponseLoggerOptions
     {
-        PropertyKey = "RequestBody",
-        HttpVerbs = new[] { "POST" },
+        PropertyKey = "ResponseBody",
         MaxSize = 100,
         CutOffText = "SNIP",
         ContentType = "application/json",
-        Path = "/"
     });
 
     // ...
