@@ -6,6 +6,14 @@ This nuget package provides a custom middleware that allows to write the body of
 
 ![](https://i.imgur.com/0fxsnKN.png)
 
+## Features
+
+- Log request & response body to Application Insights
+- Configure maximum length to store
+- Provide optional cut off text
+- Configure name of custom dimension key
+- Filter based on request path and content type 
+
 ## Installation 
 
 Just pull in the nuget package like so: 
