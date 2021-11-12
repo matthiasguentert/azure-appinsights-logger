@@ -24,7 +24,7 @@ dotnet add package Azureblue.ApplicationInsights.RequestLogging
 
 Then you'll have to register the middleware in your `Startup` class with your container. 
 
-```
+```csharp
 using Azureblue.ApplicationInsights.RequestLogging;
 
 // ...
@@ -57,7 +57,7 @@ public void ConfigureServices(IServiceCollection services)
 
 Finally configure the request pipeline. 
 
-```
+```csharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
     if (env.IsDevelopment())
@@ -80,7 +80,7 @@ Use an instance of `RequestLoggerOptions` and `ResponseLoggerOptions` to configu
 
 ### RequestLoggerOptions
 
-```
+```csharp
 public class RequestLoggerOptions
 {
     public string PropertyKey { get; set; } = "RequestBody";
@@ -99,7 +99,7 @@ public class RequestLoggerOptions
 
 ### ResonseLoggerOptions
 
-```
+```csharp
 public class ResponseLoggerOptions
 {
     public string PropertyKey { get; set; } = "ResponseBody";
