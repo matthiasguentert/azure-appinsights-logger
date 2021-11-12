@@ -6,7 +6,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
     {
         public string PropertyKey { get; set; } = "ResponseBody";
 
-        public int MaxSize { get; set; } = 100;
+        public int MaxBytes { get; set; } = 80000;
 
         public string CutOffText { get; set; } = "\n---8<------------------------\nSSHORTENED-DUE-TO-MAXSIZE-LIMIT";
 

@@ -6,7 +6,7 @@
 
         public string[] HttpVerbs { get; set; } = { "POST", "PUT" };
 
-        public int MaxSize { get; set; } = 100;
+        public int MaxBytes { get; set; } = 80000;
 
         public string CutOffText { get; set; } = "\n---8<------------------------\nSSHORTENED-DUE-TO-MAXSIZE-LIMIT";
 

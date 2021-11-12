@@ -1,5 +1,7 @@
 ﻿using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -7,9 +9,17 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public class ResponseLogger : IMiddleware
     {
-        private readonly ResponseLoggerOptions options;
+        private readonly IOptions<ResponseLoggerOptions> _options;
 
-        public ResponseLogger(ResponseLoggerOptions options) => this.options = options;
+        public ResponseLogger(IOptions<ResponseLoggerOptions> options)
+        {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            _options = options;
+        }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
@@ -25,22 +35,22 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 
             try
             {
-                if (this.options.ContentType == context.Response.ContentType)
+                if (_options.Value.ContentType == context.Response.ContentType)
                 {
                     // Read response body from memory stream
                     memoryStream.Position = 0;
                     var reader = new StreamReader(memoryStream);
 
                     string responseBody;
-                    if (this.options.MaxSize > 0)
+                    if (_options.Value.MaxBytes > 0)
                     {
-                        var buffer = new char[this.options.MaxSize];
-                        _ = await reader.ReadAsync(buffer, 0, this.options.MaxSize);
+                        var buffer = new char[_options.Value.MaxBytes];
+                        _ = await reader.ReadAsync(buffer, 0, _options.Value.MaxBytes);
 
                         responseBody = new string(buffer);
 
-                        if (!string.IsNullOrEmpty(this.options.CutOffText))
-                            responseBody += this.options.CutOffText;
+                        if (!string.IsNullOrEmpty(_options.Value.CutOffText))
+                            responseBody += _options.Value.CutOffText;
                     }
                     else
                     {
@@ -49,7 +59,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 
                     // Write response body to App Insights
                     var requestTelemetry = context.Features.Get<RequestTelemetry>();
-                    requestTelemetry?.Properties.Add(this.options.PropertyKey, responseBody);
+                    requestTelemetry?.Properties.Add(_options.Value.PropertyKey, responseBody);
                 }
             }
             finally
