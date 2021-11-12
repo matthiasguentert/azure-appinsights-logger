@@ -14,6 +14,8 @@ This nuget package provides a custom middleware that allows to write the body of
 - Configure name of custom dimension key
 - Filter based on request path and content type 
 
+> A word of warning! Writing the content of an HTTP body to Application Insights might reveal sensitive user information that otherwise would be hidden and protected in transfer via TLS. So use this with care and only during debugging or developing!
+
 ## Installation 
 
 Just pull in the nuget package like so: 
@@ -34,22 +36,8 @@ public void ConfigureServices(IServiceCollection services)
     // ...
 
     services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
-    services.AddRequestLogging(new RequestLoggerOptions
-    {
-        PropertyKey = "RequestBody",
-        HttpVerbs = new[] { "POST" },
-        MaxSize = 100,
-        CutOffText = "SNIP",
-        ContentType = "application/json",
-        Path = "/"
-    });
-    services.AddResponseLogging(new ResponseLoggerOptions
-    {
-        PropertyKey = "ResponseBody",
-        MaxSize = 100,
-        CutOffText = "SNIP",
-        ContentType = "application/json",
-    });
+    services.AddRequestLogging();
+    services.AddResponseLogging();
 
     // ...
 }
@@ -71,12 +59,20 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     // ...
 }
 ```
-
-> A word of warning! Writing the content of an HTTP body to Application Insights might reveal sensitive user information that otherwise would be hidden and protected in transfer via TLS. So use this with care and only during debugging or developing!
-
 ## Configuration 
 
-Use an instance of `RequestLoggerOptions` and `ResponseLoggerOptions` to configure the middleware. See the default values below. 
+You can overwrite the default settings as follows:
+
+```csharp
+services.AddRequestLogging(o =>
+{
+    o.MaxBytes = 10000;
+    o.CutOffText = "SNIP";
+    // ...
+});
+```
+
+Or stick with the defaults which are defined in `RequestLoggerOptions` and `ResponseLoggerOptions`.
 
 ### RequestLoggerOptions
 
@@ -87,7 +83,7 @@ public class RequestLoggerOptions
 
     public string[] HttpVerbs { get; set; } = { "POST", "PUT" };
 
-    public int MaxSize { get; set; } = 100;
+    public int MaxBytes { get; set; } = 80000;
 
     public string CutOffText { get; set; } = "\n---8<------------------------\nSSHORTENED-DUE-TO-MAXSIZE-LIMIT";
 
@@ -104,7 +100,7 @@ public class ResponseLoggerOptions
 {
     public string PropertyKey { get; set; } = "ResponseBody";
 
-    public int MaxSize { get; set; } = 100;
+    public int MaxBytes { get; set; } = 80000;
 
     public string CutOffText { get; set; } = "\n---8<------------------------\nSSHORTENED-DUE-TO-MAXSIZE-LIMIT";
 

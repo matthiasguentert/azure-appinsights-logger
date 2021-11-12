@@ -1,5 +1,7 @@
 ﻿using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,9 +11,17 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public class RequestLogger : IMiddleware
     {
-        private readonly RequestLoggerOptions options;
+        private readonly IOptions<RequestLoggerOptions> _options;
 
-        public RequestLogger(RequestLoggerOptions options) => this.options = options;
+        public RequestLogger(IOptions<RequestLoggerOptions> options)
+        {
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            _options = options;
+        }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
@@ -26,9 +36,9 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             if
             (
                 canRead &&
-                this.options.HttpVerbs.Contains(method) &&
-                this.options.ContentType == contentType &&
-                this.options.Path == path
+                _options.Value.HttpVerbs.Contains(method) &&
+                _options.Value.ContentType == contentType &&
+                _options.Value.Path == path
             )
             {
                 // Leave stream open so next middleware can read it
@@ -40,15 +50,15 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 
                 string requestBody = string.Empty;
 
-                if (this.options.MaxSize > 0)
+                if (_options.Value.MaxBytes > 0)
                 {
-                    var buffer = new char[this.options.MaxSize];
-                    var readBytes = await reader.ReadAsync(buffer, 0, this.options.MaxSize);
+                    var buffer = new char[_options.Value.MaxBytes];
+                    var readBytes = await reader.ReadAsync(buffer, 0, _options.Value.MaxBytes);
 
                     requestBody = new string(buffer);
 
-                    if (!string.IsNullOrEmpty(this.options.CutOffText))
-                        requestBody += this.options.CutOffText;
+                    if (!string.IsNullOrEmpty(_options.Value.CutOffText))
+                        requestBody += _options.Value.CutOffText;
                 }
                 else
                 {
@@ -60,7 +70,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 
                 // Write request body to App Insights
                 var requestTelemetry = context.Features.Get<RequestTelemetry>();
-                requestTelemetry?.Properties.Add(options.PropertyKey, requestBody);
+                requestTelemetry?.Properties.Add(_options.Value.PropertyKey, requestBody);
             }
 
             // Call next middleware in the pipeline
