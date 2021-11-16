@@ -5,9 +5,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public static class ServiceCollectionExtensions
     {
-        #region RequestLogging
-
-        public static IServiceCollection AddRequestLogging(this IServiceCollection services)
+        public static IServiceCollection AddAppInsightsHttpBodyLogging(this IServiceCollection services)
         {
             if (services == null)
             {
@@ -15,12 +13,12 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             }
 
             services.AddOptions();
-            AddRequestLogger(services);
+            AddBodyLogger(services);
 
             return services;
         }
 
-        public static IServiceCollection AddRequestLogging(this IServiceCollection services, Action<RequestLoggerOptions> setupAction)
+        public static IServiceCollection AddAppInsightsHttpBodyLogging(this IServiceCollection services, Action<BodyLoggerOptions> setupAction)
         {
             if (services == null)
             {
@@ -32,67 +30,21 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                 throw new ArgumentNullException(nameof(setupAction));
             }
 
-            AddRequestLogger(services, setupAction);
+            AddBodyLogger(services, setupAction);
 
             return services;
         }
 
-        internal static void AddRequestLogger(IServiceCollection services)
+        internal static void AddBodyLogger(IServiceCollection services)
         {
-            services.AddTransient<RequestLogger>();
+            services.AddTransient<BodyLoggerMiddleware>();
+            services.AddTransient<IBodyReader, BodyReader>();
         }
 
-        internal static void AddRequestLogger(IServiceCollection services, Action<RequestLoggerOptions> setupAction)
+        internal static void AddBodyLogger(IServiceCollection services, Action<BodyLoggerOptions> setupAction)
         {
-            AddRequestLogger(services);
+            AddBodyLogger(services);
             services.Configure(setupAction);
         }
-
-        #endregion
-
-        #region ResponseLogging
-
-        public static IServiceCollection AddResponseLogging(this IServiceCollection services)
-        {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
-
-            services.AddOptions();
-            AddResponseLogger(services);
-
-            return services;
-        }
-
-        public static IServiceCollection AddResponseLogging(this IServiceCollection services, Action<ResponseLoggerOptions> setupAction)
-        {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
-
-            if (setupAction == null)
-            {
-                throw new ArgumentNullException(nameof(setupAction));
-            }
-
-            AddResponseLogger(services, setupAction);
-
-            return services;
-        }
-
-        internal static void AddResponseLogger(IServiceCollection services)
-        {
-            services.AddTransient<ResponseLogger>();
-        }
-
-        internal static void AddResponseLogger(IServiceCollection services, Action<ResponseLoggerOptions> setupAction)
-        {
-            AddResponseLogger(services);
-            services.Configure(setupAction);
-        }
-
-        #endregion
     }
 }
