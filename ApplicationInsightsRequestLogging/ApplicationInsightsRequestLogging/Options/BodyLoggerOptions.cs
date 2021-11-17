@@ -1,28 +1,29 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public class BodyLoggerOptions
     {
+        public BodyLoggerOptions()
+        {
+            HttpCodes.AddRange(StatusCodeRanges.Status4xx);
+            HttpCodes.AddRange(StatusCodeRanges.Status5xx);
+        }
+
         /// <summary>
         ///     Only write to App Insights on these HTTP status codes
         /// </summary>
-        public List<int> HttpCodes { get; set; } = new List<int>()
-        {
-            StatusCodes.Status400BadRequest,
-            StatusCodes.Status401Unauthorized,
-            // ...
-        };
+        public List<int> HttpCodes { get; set; } = new List<int>();
 
         /// <summary>
         ///     Only these HTTP verbs will trigger logging
         /// </summary>
         public List<string> HttpVerbs { get; set; } = new List<string>()
         {
-            "POST", "PUT"
+            HttpMethods.Post, 
+            HttpMethods.Put,
+            HttpMethods.Patch
         };
 
         /// <summary>
