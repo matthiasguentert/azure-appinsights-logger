@@ -1,5 +1,4 @@
-﻿using Microsoft.ApplicationInsights.DataContracts;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
@@ -10,11 +9,13 @@ namespace Azureblue.ApplicationInsights.RequestLogging
     {
         private readonly IOptions<BodyLoggerOptions> _options;
         private readonly IBodyReader _bodyReader;
+        private readonly ITelemetryWriter _telemetryWriter;
 
-        public BodyLoggerMiddleware(IOptions<BodyLoggerOptions> options, IBodyReader bodyReader)
+        public BodyLoggerMiddleware(IOptions<BodyLoggerOptions> options, IBodyReader bodyReader, ITelemetryWriter telemetryWriter)
         {
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _bodyReader = bodyReader ?? throw new ArgumentNullException(nameof(bodyReader));
+            _telemetryWriter = telemetryWriter ?? throw new ArgumentNullException(nameof(telemetryWriter));
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -37,9 +38,8 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                 {
                     var responseBody = await _bodyReader.ReadResponseBodyAsync(context, _options.Value.MaxBytes, _options.Value.Appendix);
 
-                    var requestTelemtry = context.Features.Get<RequestTelemetry>();
-                    requestTelemtry?.Properties.Add(_options.Value.RequestBodyPropertyKey, requestBody);
-                    requestTelemtry?.Properties.Add(_options.Value.ResponseBodyPropertyKey, responseBody);
+                    _telemetryWriter.Write(context, _options.Value.RequestBodyPropertyKey, requestBody);
+                    _telemetryWriter.Write(context, _options.Value.ResponseBodyPropertyKey, responseBody);
                 }
             }
         }
