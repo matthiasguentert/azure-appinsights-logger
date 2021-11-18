@@ -11,7 +11,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         private Stream? _originalResponseBodyStream;
         private MemoryStream? _memoryStream;
 
-        public async Task<string> ReadRequestBodyAsync(HttpContext context, int bytes, string appendix)
+        public virtual async Task<string> ReadRequestBodyAsync(HttpContext context, int bytes, string appendix)
         {
             context.Request.EnableBuffering();
 
@@ -45,7 +45,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             return requestBody;
         }
 
-        public void PrepareResponseBodyReading(HttpContext context)
+        public virtual void PrepareResponseBodyReading(HttpContext context)
         {
             // Store original response body stream
             _originalResponseBodyStream = context.Response.Body;
@@ -55,7 +55,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             context.Response.Body = _memoryStream;
         }
 
-        public async Task<string> ReadResponseBodyAsync(HttpContext context, int bytes, string appendix)
+        public virtual async Task<string> ReadResponseBodyAsync(HttpContext context, int bytes, string appendix)
         {
             if (_memoryStream == null)
             {
