@@ -36,7 +36,7 @@ namespace ApplicationInsightsRequestLoggingTests.Reader
             var result = await reader.ReadRequestBodyAsync(context, requestBody.Length, string.Empty);
 
             // Assert
-            result.Should().Be("Hello from test environment\r\n");
+            result.Should().StartWith("Hello from test environment");
         }
 
         [Fact]
