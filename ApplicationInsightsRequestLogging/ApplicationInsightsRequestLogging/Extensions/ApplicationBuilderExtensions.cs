@@ -4,14 +4,9 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public static class ApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseRequestLogging(this IApplicationBuilder app)
+        public static IApplicationBuilder UseAppInsightsHttpBodyLogging(this IApplicationBuilder app)
         {
-            return app.UseMiddleware<RequestLogger>();
-        }
-
-        public static IApplicationBuilder UseResponseLogging(this IApplicationBuilder app)
-        {
-            return app.UseMiddleware<ResponseLogger>();
+            return app.UseMiddleware<BodyLoggerMiddleware>();
         }
     }
 }
