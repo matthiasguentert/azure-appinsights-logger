@@ -37,7 +37,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         public string ResponseBodyPropertyKey { get; set; } = "ResponseBody";
 
         /// <summary>
-        ///     Defines how many bytes should be read from HTTP context
+        ///     Defines the amount of bytes that should be read from HTTP context
         /// </summary>
         public int MaxBytes { get; set; } = 80000;
 

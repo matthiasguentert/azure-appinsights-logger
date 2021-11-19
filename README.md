@@ -36,8 +36,7 @@ public void ConfigureServices(IServiceCollection services)
     // ...
 
     services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
-    services.AddRequestLogging();
-    services.AddResponseLogging();
+    services.AddAppInsightsHttpBodyLogging();
 
     // ...
 }
@@ -51,9 +50,7 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     if (env.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
-        
-        app.UseRequestLogging();
-        app.UseResponseLogging();
+        app.UseAppInsightsHttpBodyLogging();
     }
     
     // ...
@@ -64,46 +61,60 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 You can overwrite the default settings as follows:
 
 ```csharp
-services.AddRequestLogging(o =>
-{
-    o.MaxBytes = 10000;
-    o.CutOffText = "SNIP";
-    // ...
+services.AddAppInsightsHttpBodyLogging(o => {
+    o.HttpCodes.Add(StatusCodes.Status200OK);
+    o.HttpVerbs.Add(HttpMethods.Get);
+    o.MaxBytes = 10000
+    o.Appendix = "\nSNIP"
 });
 ```
 
-Or stick with the defaults which are defined in `RequestLoggerOptions` and `ResponseLoggerOptions`.
+Or stick with the defaults which are defined in `BodyLoggerOptions`.
 
-### RequestLoggerOptions
-
-```csharp
-public class RequestLoggerOptions
-{
-    public string PropertyKey { get; set; } = "RequestBody";
-
-    public string[] HttpVerbs { get; set; } = { "POST", "PUT" };
-
-    public int MaxBytes { get; set; } = 80000;
-
-    public string CutOffText { get; set; } = "\n---8<------------------------\nSSHORTENED-DUE-TO-MAXSIZE-LIMIT";
-
-    public string? ContentType { get; set; } = null;
-
-    public string Path { get; set; } = "/";
-}
-``` 
-
-### ResonseLoggerOptions
+### BodyLoggerOptions
 
 ```csharp
-public class ResponseLoggerOptions
+public class BodyLoggerOptions
 {
-    public string PropertyKey { get; set; } = "ResponseBody";
+    public BodyLoggerOptions()
+    {
+        HttpCodes.AddRange(StatusCodeRanges.Status4xx);
+        HttpCodes.AddRange(StatusCodeRanges.Status5xx);
+    }
 
+    /// <summary>
+    ///     Only write to App Insights on these HTTP status codes
+    /// </summary>
+    public List<int> HttpCodes { get; set; } = new List<int>();
+
+    /// <summary>
+    ///     Only these HTTP verbs will trigger logging
+    /// </summary>
+    public List<string> HttpVerbs { get; set; } = new List<string>()
+    {
+        HttpMethods.Post, 
+        HttpMethods.Put,
+        HttpMethods.Patch
+    };
+
+    /// <summary>
+    ///     Which property key should be used
+    /// </summary>
+    public string RequestBodyPropertyKey { get; set; } = "RequestBody";
+
+    /// <summary>
+    ///     Which property key should be used
+    /// </summary>
+    public string ResponseBodyPropertyKey { get; set; } = "ResponseBody";
+
+    /// <summary>
+    ///     Defines the amount of bytes that should be read from HTTP context
+    /// </summary>
     public int MaxBytes { get; set; } = 80000;
 
-    public string CutOffText { get; set; } = "\n---8<------------------------\nSSHORTENED-DUE-TO-MAXSIZE-LIMIT";
-
-    public string? ContentType { get; set; } = MediaTypeNames.Application.Json;
+    /// <summary>
+    ///     Defines the text to append in case the body should be truncated <seealso cref="MaxBytes"/>
+    /// </summary>
+    public string Appendix { get; set; } = "\n---8<------------------------\nTRUNCATED DUE TO MAXBYTES LIMIT";
 }
 ```
