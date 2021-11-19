@@ -1,0 +1,39 @@
+name: .NET
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: ApplicationInsightsRequestLogging
+    
+    - name: Build
+      run: dotnet build --no-restore
+      working-directory: ApplicationInsightsRequestLogging
+      
+    - name: Test
+      run: dotnet test --logger trx --results-directory "TestResults" 
+      working-directory: ApplicationInsightsRequestLogging
+      
+    - name: Upload dotnet test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: dotnet-results
+        path: TestResults
+      if: ${{ always() }}
