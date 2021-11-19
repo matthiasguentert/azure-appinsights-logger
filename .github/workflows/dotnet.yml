@@ -2,9 +2,9 @@ name: .NET
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build:
@@ -25,4 +25,8 @@ jobs:
     
     - name: Build
       run: dotnet build --no-restore
+      working-directory: ApplicationInsightsRequestLogging
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal 
       working-directory: ApplicationInsightsRequestLogging
