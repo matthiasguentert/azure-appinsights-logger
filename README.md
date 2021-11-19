@@ -14,6 +14,8 @@ This nuget package provides a custom middleware that allows to write the body of
 - Configure name of custom dimension key
 - Filter based on request path and content type 
 
+> A word of warning! Writing the content of an HTTP body to Application Insights might reveal sensitive user information that otherwise would be hidden and protected in transfer via TLS. So use this with care and only during debugging or developing!
+
 ## Installation 
 
 Just pull in the nuget package like so: 
@@ -34,22 +36,7 @@ public void ConfigureServices(IServiceCollection services)
     // ...
 
     services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
-    services.AddRequestLogging(new RequestLoggerOptions
-    {
-        PropertyKey = "RequestBody",
-        HttpVerbs = new[] { "POST" },
-        MaxSize = 100,
-        CutOffText = "SNIP",
-        ContentType = "application/json",
-        Path = "/"
-    });
-    services.AddResponseLogging(new ResponseLoggerOptions
-    {
-        PropertyKey = "ResponseBody",
-        MaxSize = 100,
-        CutOffText = "SNIP",
-        ContentType = "application/json",
-    });
+    services.AddAppInsightsHttpBodyLogging();
 
     // ...
 }
@@ -63,51 +50,71 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     if (env.IsDevelopment())
     {
         app.UseDeveloperExceptionPage();
-        
-        app.UseRequestLogging();
-        app.UseResponseLogging();
+        app.UseAppInsightsHttpBodyLogging();
     }
     
     // ...
 }
 ```
-
-> A word of warning! Writing the content of an HTTP body to Application Insights might reveal sensitive user information that otherwise would be hidden and protected in transfer via TLS. So use this with care and only during debugging or developing!
-
 ## Configuration 
 
-Use an instance of `RequestLoggerOptions` and `ResponseLoggerOptions` to configure the middleware. See the default values below. 
-
-### RequestLoggerOptions
+You can overwrite the default settings as follows:
 
 ```csharp
-public class RequestLoggerOptions
-{
-    public string PropertyKey { get; set; } = "RequestBody";
+services.AddAppInsightsHttpBodyLogging(o => {
+    o.HttpCodes.Add(StatusCodes.Status200OK);
+    o.HttpVerbs.Add(HttpMethods.Get);
+    o.MaxBytes = 10000
+    o.Appendix = "\nSNIP"
+});
+```
 
-    public string[] HttpVerbs { get; set; } = { "POST", "PUT" };
+Or stick with the defaults which are defined in `BodyLoggerOptions`.
 
-    public int MaxSize { get; set; } = 100;
-
-    public string CutOffText { get; set; } = "\n---8<------------------------\nSSHORTENED-DUE-TO-MAXSIZE-LIMIT";
-
-    public string? ContentType { get; set; } = null;
-
-    public string Path { get; set; } = "/";
-}
-``` 
-
-### ResonseLoggerOptions
+### BodyLoggerOptions
 
 ```csharp
-public class ResponseLoggerOptions
+public class BodyLoggerOptions
 {
-    public string PropertyKey { get; set; } = "ResponseBody";
+    public BodyLoggerOptions()
+    {
+        HttpCodes.AddRange(StatusCodeRanges.Status4xx);
+        HttpCodes.AddRange(StatusCodeRanges.Status5xx);
+    }
 
-    public int MaxSize { get; set; } = 100;
+    /// <summary>
+    ///     Only write to App Insights on these HTTP status codes
+    /// </summary>
+    public List<int> HttpCodes { get; set; } = new List<int>();
 
-    public string CutOffText { get; set; } = "\n---8<------------------------\nSSHORTENED-DUE-TO-MAXSIZE-LIMIT";
+    /// <summary>
+    ///     Only these HTTP verbs will trigger logging
+    /// </summary>
+    public List<string> HttpVerbs { get; set; } = new List<string>()
+    {
+        HttpMethods.Post, 
+        HttpMethods.Put,
+        HttpMethods.Patch
+    };
 
-    public string? ContentType { get; set; } = MediaTypeNames.Application.Json;
+    /// <summary>
+    ///     Which property key should be used
+    /// </summary>
+    public string RequestBodyPropertyKey { get; set; } = "RequestBody";
+
+    /// <summary>
+    ///     Which property key should be used
+    /// </summary>
+    public string ResponseBodyPropertyKey { get; set; } = "ResponseBody";
+
+    /// <summary>
+    ///     Defines the amount of bytes that should be read from HTTP context
+    /// </summary>
+    public int MaxBytes { get; set; } = 80000;
+
+    /// <summary>
+    ///     Defines the text to append in case the body should be truncated <seealso cref="MaxBytes"/>
+    /// </summary>
+    public string Appendix { get; set; } = "\n---8<------------------------\nTRUNCATED DUE TO MAXBYTES LIMIT";
 }
 ```
