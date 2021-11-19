@@ -30,5 +30,5 @@ jobs:
       working-directory: ApplicationInsightsRequestLogging/ApplicationInsightsRequestLogging
     
     - name: Publish the package to GPR
-      run: dotnet nuget push ./bin/release/*.nupkg
+      run: dotnet nuget push ./bin/Release/*.nupkg
       working-directory: ApplicationInsightsRequestLogging/ApplicationInsightsRequestLogging
