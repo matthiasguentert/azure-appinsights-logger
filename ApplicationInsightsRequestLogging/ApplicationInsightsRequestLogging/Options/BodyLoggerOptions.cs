@@ -21,7 +21,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         /// </summary>
         public List<string> HttpVerbs { get; set; } = new List<string>()
         {
-            HttpMethods.Post, 
+            HttpMethods.Post,
             HttpMethods.Put,
             HttpMethods.Patch
         };
@@ -45,5 +45,18 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         ///     Defines the text to append in case the body should be truncated <seealso cref="MaxBytes"/>
         /// </summary>
         public string Appendix { get; set; } = "\n---8<------------------------\nTRUNCATED DUE TO MAXBYTES LIMIT";
+
+        public IEnumerable<string> PropertiesWithSensitiveData { get; set; } = new List<string>()
+        {
+            "password",
+            "secret",
+            "passwd",
+            "api_key",
+            "access_token",
+            "accessToken",
+            "auth",
+            "credentials",
+            "mysql_pwd"
+        };
     }
 }
