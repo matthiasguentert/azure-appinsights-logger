@@ -46,7 +46,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         /// </summary>
         public string Appendix { get; set; } = "\n---8<------------------------\nTRUNCATED DUE TO MAXBYTES LIMIT";
 
-        public IEnumerable<string> PropertiesWithSensitiveData { get; set; } = new List<string>()
+        public IEnumerable<string> PropertyNamesWithSensitiveData { get; set; } = new List<string>()
         {
             "password",
             "secret",
@@ -57,6 +57,11 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             "auth",
             "credentials",
             "mysql_pwd"
+        };
+
+        public IEnumerable<string> SensitiveDataRegexes { get; set; } = new List<string>()
+        {
+            @"(?:4[0-9]{12}(?:[0-9]{3})?|[25][1-7][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})" // credit cards from https://stackoverflow.com/questions/9315647/regex-credit-card-number-tests
         };
     }
 }

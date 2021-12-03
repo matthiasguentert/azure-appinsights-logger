@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Azureblue.ApplicationInsights.RequestLogging.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Azureblue.ApplicationInsights.RequestLogging
@@ -40,6 +41,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             services.AddTransient<BodyLoggerMiddleware>();
             services.AddTransient<IBodyReader, BodyReader>();
             services.AddTransient<ITelemetryWriter, TelemetryWriter>();
+            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
         }
 
         internal static void AddBodyLogger(IServiceCollection services, Action<BodyLoggerOptions> setupAction)
