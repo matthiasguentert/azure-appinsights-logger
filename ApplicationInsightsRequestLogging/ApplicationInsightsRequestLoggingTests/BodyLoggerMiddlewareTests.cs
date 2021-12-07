@@ -63,6 +63,52 @@ namespace ApplicationInsightsRequestLoggingTests
             telemetryWriter.Verify(x => x.Write(It.IsAny<HttpContext>(), "RequestBody", "Hello from client"), Times.Once);
             telemetryWriter.Verify(x => x.Write(It.IsAny<HttpContext>(), "ResponseBody", "Hello from client"), Times.Once);
         }
+        
+        /// <summary>
+        /// This used to blow up with the following message and return a 500 error
+        /// <c>System.InvalidOperationException: Response Content-Length mismatch: too few bytes written (0 of XXX)</c>
+        /// because the original stream was never returned.
+        /// </summary>
+        [Fact]
+        public async void BodyLoggerMiddleware_Should_Not_Send_Data_To_AppInsights_When_StatusCode_Is_Not_Of_Interest()
+        {
+            // Arrange
+            var telemetryWriter = new Mock<ITelemetryWriter>();
+
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureServices(services =>
+                        {
+                            services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddSingleton(telemetryWriter.Object);
+                            services.AddTransient<BodyLoggerMiddleware>();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseMiddleware<BodyLoggerMiddleware>();
+                            app.Run(async context =>
+                            {
+                                // Send request body back in response body
+                                context.Response.StatusCode = StatusCodes.Status200OK;
+                                await context.Request.Body.CopyToAsync(context.Response.Body);
+                            });
+                        });
+                })
+                .StartAsync();
+
+            // Act
+            var response = await host.GetTestClient().PostAsync("/", new StringContent("Hello from client"));
+
+            // Assert
+            var body = await response.Content.ReadAsStringAsync();
+            body.Should().Be("Hello from client");
+            
+            telemetryWriter.Verify(x => x.Write(It.IsAny<HttpContext>(), "RequestBody", "Hello from client"), Times.Never);
+            telemetryWriter.Verify(x => x.Write(It.IsAny<HttpContext>(), "ResponseBody", "Hello from client"), Times.Never);
+        }
 
         [Fact]
         public async void BodyLoggerMiddleware_Should_Leave_Body_intact()
