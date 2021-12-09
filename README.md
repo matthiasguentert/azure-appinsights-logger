@@ -9,10 +9,11 @@ This nuget package provides a custom middleware that allows to write the body of
 ## Features
 
 - Log request & response body to Application Insights
-- Configure maximum length to store
+- Configure HTTP verbs that will trigger logging 
+- Configure HTTP status code ranges that will trigger logging
+- Configure maximum body length to store
 - Provide optional cut off text
 - Configure name of custom dimension key
-- Filter based on request path and content type 
 
 > A word of warning! Writing the content of an HTTP body to Application Insights might reveal sensitive user information that otherwise would be hidden and protected in transfer via TLS. So use this with care and only during debugging or developing!
 
