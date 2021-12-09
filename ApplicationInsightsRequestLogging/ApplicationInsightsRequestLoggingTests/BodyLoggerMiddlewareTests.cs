@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using Moq;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ApplicationInsightsRequestLoggingTests
