@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
-namespace Azureblue.ApplicationInsights.RequestLogging.Filters
+namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public class SensitiveDataFilter : ISensitiveDataFilter
     {

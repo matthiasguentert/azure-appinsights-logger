@@ -1,11 +1,11 @@
-using Azureblue.ApplicationInsights.RequestLogging.Filters;
+using Azureblue.ApplicationInsights.RequestLogging;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Xunit;
 
-namespace ApplicationInsightsRequestLoggingTests.Reader
+namespace ApplicationInsightsRequestLoggingTests.Filters
 {
     public class SensitiveDataFilterTests
     {
