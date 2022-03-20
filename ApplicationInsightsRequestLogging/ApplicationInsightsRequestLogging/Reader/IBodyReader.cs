@@ -10,5 +10,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         public void PrepareResponseBodyReading(HttpContext context);
 
         public Task<string> ReadResponseBodyAsync(HttpContext context, int bytes, string appendix);
+
+        public Task RestoreOriginalResponseBodyStreamAsync(HttpContext context);
     }
 }

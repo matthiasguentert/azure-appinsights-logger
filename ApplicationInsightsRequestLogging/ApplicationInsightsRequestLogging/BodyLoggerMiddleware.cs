@@ -43,6 +43,10 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                     _telemetryWriter.Write(context, _options.Value.RequestBodyPropertyKey, _sensitiveDataFilter.RemoveSensitiveData(requestBody));
                     _telemetryWriter.Write(context, _options.Value.ResponseBodyPropertyKey, _sensitiveDataFilter.RemoveSensitiveData(responseBody));
                 }
+                
+                // Copy back so response body is available for the user agent
+                // prevent 500 error when Not StatusCode of Interest
+                await this._bodyReader.RestoreOriginalResponseBodyStreamAsync(context);
             }
         }
     }
