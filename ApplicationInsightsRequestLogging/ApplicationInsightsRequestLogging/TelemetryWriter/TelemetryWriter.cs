@@ -8,7 +8,11 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         public void Write(HttpContext context, string key, string value)
         {
             var requestTelemtry = context.Features.Get<RequestTelemetry>();
-            requestTelemtry?.Properties.Add(key, value);
+
+            // add to dictionary, creating an altered key name if already present
+            requestTelemetry?.Properties.Add(
+                !requestTelemetry.Properties.ContainsKey(key) ? key : $"{key}-dupe-{Guid.NewGuid().ToString()[..8]}",
+                value);
         }
     }
 }
