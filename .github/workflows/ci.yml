@@ -8,10 +8,16 @@ on:
     branches: 
       - main
 
+env:
+  ARTIFACT_PATH: .\artifact
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Environment
+      run: env 
+        
     - name: Checkout 
       uses: actions/checkout@v2
     
@@ -19,14 +25,19 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.x
-    
-    - name: Build and Test
-      run: ./Build.ps1
-      shell: pwsh
+        
+    - name: Build 
+      run: dotnet build -c Release
+      
+    - name: Test
+      run: dotnet test -c Release -r ${{ env.ARTIFACT_PATH }} --no-build -l trx --verbosity=normal
+      
+    - name: Pack
+      run: dotnet pack .\src\ApplicationInsightsRequestLogging\ApplicationInsightsRequestLogging.csproj -c Release -o ${{ env.ARTIFACT_PATH }} --no-build
       
     - name: Artifacts
       uses: actions/upload-artifact@v2
       with:
         name: artifacts
-        path: artifacts/**/*
+        path: ${{ env.ARTIFACT_PATH }}/**/*
         
