@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  ARTIFACT_PATH: .\artifact
+  ARTIFACT_PATH: artifacts
 
 jobs:
   build:
