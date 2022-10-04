@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 		.github\workflows\release.yml = .github\workflows\release.yml
-		Push.ps1 = Push.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B1127F87-7877-4664-8E3E-9F86202A51DE}"

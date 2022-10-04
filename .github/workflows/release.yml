@@ -7,6 +7,7 @@ on:
         
 env:
   ARTIFACT_PATH: artifacts
+  VERSION: ${{github.ref_name}}
   
 jobs:
   build:
@@ -16,27 +17,31 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
+      - name: Environment
+        run: env
+        
       - name: Checkout
         uses: actions/checkout@v2
         
-      - name: Setup dotnet 6.0
+      - name: Setup 
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: 6.0.x
           
-      - name: Build and Test
-        run: ./Build.ps1
-        shell: pwsh
-       
-      - name: Push to NuGet
-        env:
-          NUGET_URL: https://api.nuget.org/v3/index.json
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: ./Push.ps1
-        shell: pwsh
+      - name: Build
+        run: dotnet build -c Release
+          
+      - name: Test
+        run: dotnet test -c Release -r ${{ env.ARTIFACT_PATH }} --no-build -l trx --verbosity=normal
+
+      - name: Pack
+        run: dotnet pack -c Release -o ${{ env.ARTIFACT_PATH }} --no-build
+                  
+      - name: Publish
+        run: dotnet nuget push ${{ env.ARTIFACT_PATH }}/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source "https://api.nuget.org/v3/index.json"
         
       - name: Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: artifacts
-          path: artifacts/**/*
+          path: ${{ env.ARTIFACT_PATH }}/**/*
