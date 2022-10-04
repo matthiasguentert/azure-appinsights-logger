@@ -1,4 +1,5 @@
-﻿using Microsoft.ApplicationInsights.DataContracts;
+﻿using System;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http;
 
 namespace Azureblue.ApplicationInsights.RequestLogging
@@ -7,7 +8,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
     {
         public void Write(HttpContext context, string key, string value)
         {
-            var requestTelemtry = context.Features.Get<RequestTelemetry>();
+            var requestTelemetry = context.Features.Get<RequestTelemetry>();
 
             // add to dictionary, creating an altered key name if already present
             requestTelemetry?.Properties.Add(
