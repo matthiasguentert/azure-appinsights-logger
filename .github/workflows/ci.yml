@@ -36,7 +36,7 @@ jobs:
       run: dotnet pack -c Release -o ${{ env.ARTIFACT_PATH }} --no-build
       
     - name: Publish 
-      run: dotnet nuget push ${{ env.ARTIFACT_PATH }}/*.nupkg --api-key ${{ secrets.PUBLISH_PKG_KEY }} --source "github"
+      run: dotnet nuget push ${{ env.ARTIFACT_PATH }}/*.nupkg --api-key ${{ secrets.PUBLISH_PKG_KEY }}
     
     - name: Artifacts
       uses: actions/upload-artifact@v2
