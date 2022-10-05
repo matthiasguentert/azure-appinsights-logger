@@ -45,5 +45,10 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         ///     Defines the text to append in case the body should be truncated <seealso cref="MaxBytes"/>
         /// </summary>
         public string Appendix { get; set; } = "\n---8<------------------------\nTRUNCATED DUE TO MAXBYTES LIMIT";
+
+        /// <summary>
+        ///     Controls storage of client IP addresses https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-collection?tabs=net
+        /// </summary>
+        public bool DisableIpMasking { get; set; } = false;
     }
 }

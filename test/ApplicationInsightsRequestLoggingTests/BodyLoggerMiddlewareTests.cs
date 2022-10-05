@@ -177,5 +177,43 @@ namespace ApplicationInsightsRequestLoggingTests
             var body = await response.Content.ReadAsStringAsync();
             body.Should().Be("Hello from terminating delegate!");
         }
+        
+        [Fact]
+        public async void BodyLoggerMiddleware_Should_Disable_Ip_Masking()
+        {
+            // Arrange            
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureServices(services =>
+                        {
+                            services.AddAppInsightsHttpBodyLogging(o =>
+                            {
+                                // Ensure middleware kicks in on success status
+                                o.HttpCodes.Add(StatusCodes.Status200OK);
+                                o.DisableIpMasking = true;
+                            });
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseAppInsightsHttpBodyLogging();
+                            app.Run(async context =>
+                            {
+                                // Send request body back in response body
+                                await context.Request.Body.CopyToAsync(context.Response.Body);
+                            });
+                        });
+                })
+                .StartAsync();
+
+            // Act
+            var response = await host.GetTestClient().PostAsync("/", new StringContent("Hello from client"));
+
+            // Assert
+            var body = await response.Content.ReadAsStringAsync();
+            body.Should().Be("Hello from client");
+        }
     }
 }

@@ -7,13 +7,13 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 {
     public class BodyLoggerMiddleware : IMiddleware
     {
-        private readonly IOptions<BodyLoggerOptions> _options;
+        private readonly BodyLoggerOptions _options;
         private readonly IBodyReader _bodyReader;
         private readonly ITelemetryWriter _telemetryWriter;
 
         public BodyLoggerMiddleware(IOptions<BodyLoggerOptions> options, IBodyReader bodyReader, ITelemetryWriter telemetryWriter)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _bodyReader = bodyReader ?? throw new ArgumentNullException(nameof(bodyReader));
             _telemetryWriter = telemetryWriter ?? throw new ArgumentNullException(nameof(telemetryWriter));
         }
@@ -21,10 +21,10 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var requestBody = string.Empty;
-            if (_options.Value.HttpVerbs.Contains(context.Request.Method))
+            if (_options.HttpVerbs.Contains(context.Request.Method))
             {
                 // Temporarily store request body
-                requestBody = await _bodyReader.ReadRequestBodyAsync(context, _options.Value.MaxBytes, _options.Value.Appendix);
+                requestBody = await _bodyReader.ReadRequestBodyAsync(context, _options.MaxBytes, _options.Appendix);
 
                 _bodyReader.PrepareResponseBodyReading(context);
             }
@@ -32,19 +32,19 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             // hand over to the next middleware and wait for the call to return
             await next(context);
 
-            if (_options.Value.HttpVerbs.Contains(context.Request.Method))
+            if (_options.HttpVerbs.Contains(context.Request.Method))
             {
-                if (_options.Value.HttpCodes.Contains(context.Response.StatusCode))
+                if (_options.HttpCodes.Contains(context.Response.StatusCode))
                 {
-                    var responseBody = await _bodyReader.ReadResponseBodyAsync(context, _options.Value.MaxBytes, _options.Value.Appendix);
+                    var responseBody = await _bodyReader.ReadResponseBodyAsync(context, _options.MaxBytes, _options.Appendix);
 
-                    _telemetryWriter.Write(context, _options.Value.RequestBodyPropertyKey, requestBody);
-                    _telemetryWriter.Write(context, _options.Value.ResponseBodyPropertyKey, responseBody);
+                    _telemetryWriter.Write(context, _options.RequestBodyPropertyKey, requestBody);
+                    _telemetryWriter.Write(context, _options.ResponseBodyPropertyKey, responseBody);
                 }
                 
                 // Copy back so response body is available for the user agent
                 // prevent 500 error when Not StatusCode of Interest
-                await this._bodyReader.RestoreOriginalResponseBodyStreamAsync(context);
+                await _bodyReader.RestoreOriginalResponseBodyStreamAsync(context);
             }
         }
     }
