@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using Microsoft.ApplicationInsights.Extensibility;
 
 namespace Azureblue.ApplicationInsights.RequestLogging
 {
@@ -34,6 +35,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             services.AddScoped<BodyLoggerMiddleware>();
             services.AddScoped<IBodyReader, BodyReader>();
             services.AddScoped<ITelemetryWriter, TelemetryWriter>();
+            services.AddScoped<ITelemetryInitializer, CloneIpAddress>();
         }
 
         private static void AddBodyLogger(IServiceCollection services, Action<BodyLoggerOptions> setupAction)
