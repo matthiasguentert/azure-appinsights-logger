@@ -1,6 +1,7 @@
 ﻿using Azureblue.ApplicationInsights.RequestLogging;
 using FluentAssertions;
 using System;
+using System.Linq;
 using Xunit;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Hosting;
@@ -19,10 +20,10 @@ namespace ApplicationInsightsRequestLoggingTests
         public void BodyLoggerMiddleware_Should_Throw_If_Ctor_Params_Null()
         {
             // Arrange & Act
-            Action action = () => { var middleware = new BodyLoggerMiddleware(null, null, null); };
+            var action = () => { var middleware = new BodyLoggerMiddleware(null, null, null); };
 
             // Assert
-            action.Should().Throw<ArgumentNullException>();
+            action.Should().Throw<NullReferenceException>();
         }
 
         [Fact]

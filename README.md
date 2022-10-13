@@ -1,10 +1,10 @@
-# Extended HTTP request & response logging with Application Insights
+# Extended request logging with Application Insights
 
 ## Introduction 
 
 This nuget package provides a custom middleware that allows to write the body of an HTTP request/response to a custom dimension. 
 
-![](https://i.imgur.com/0fxsnKN.png)
+![](https://i.imgur.com/CNbVKsx.png)
 
 ## Features
 
@@ -13,7 +13,8 @@ This nuget package provides a custom middleware that allows to write the body of
 - Configure HTTP status code ranges that will trigger logging
 - Configure maximum body length to store
 - Provide optional cut off text
-- Configure name of custom dimension key
+- Configure name of custom dimension keys
+- Disable IP masking without the need to modify the App Insights resource as described [here](https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-collection?tabs=net)
 
 > A word of warning! Writing the content of an HTTP body to Application Insights might reveal sensitive user information that otherwise would be hidden and protected in transfer via TLS. So use this with care and only during debugging or developing!
 
@@ -36,14 +37,17 @@ public void ConfigureServices(IServiceCollection services)
 {
     // ...
 
-    services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+    // Register App Insights 
+    services.AddApplicationInsightsTelemetry();
+    
+    // Register this middleware
     services.AddAppInsightsHttpBodyLogging();
 
     // ...
 }
 ```
 
-Finally configure the request pipeline. 
+Finally configure the request pipeline. Make sure the call to `UseAppInsightsHttpBodyLogging` happens as early as possible as the [order matters](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-6.0#middleware-order). Have a look at this [issue](https://github.com/matthiasguentert/azure-appinsights-logger/issues/11)
 
 ```csharp
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -59,18 +63,19 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 ```
 ## Configuration 
 
-You can overwrite the default settings as follows:
+You can overwrite the default settings as follows...
 
 ```csharp
 services.AddAppInsightsHttpBodyLogging(o => {
     o.HttpCodes.Add(StatusCodes.Status200OK);
     o.HttpVerbs.Add(HttpMethods.Get);
-    o.MaxBytes = 10000
-    o.Appendix = "\nSNIP"
+    o.MaxBytes = 10000;
+    o.Appendix = "\nSNIP";
+    o.DisableIpMasking = true;
 });
 ```
 
-Or stick with the defaults which are defined in `BodyLoggerOptions`.
+...or stick with the defaults which are defined in `BodyLoggerOptions`.
 
 ### BodyLoggerOptions
 
@@ -109,6 +114,11 @@ public class BodyLoggerOptions
     public string ResponseBodyPropertyKey { get; set; } = "ResponseBody";
 
     /// <summary>
+    ///     Which property key should be used
+    /// </summary>
+    public string ClientIpPropertyKey { get; set; } = "ClientIp";
+    
+    /// <summary>
     ///     Defines the amount of bytes that should be read from HTTP context
     /// </summary>
     public int MaxBytes { get; set; } = 80000;
@@ -117,5 +127,10 @@ public class BodyLoggerOptions
     ///     Defines the text to append in case the body should be truncated <seealso cref="MaxBytes"/>
     /// </summary>
     public string Appendix { get; set; } = "\n---8<------------------------\nTRUNCATED DUE TO MAXBYTES LIMIT";
+
+    /// <summary>
+    ///     Controls storage of client IP addresses https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-collection?tabs=net
+    /// </summary>
+    public bool DisableIpMasking { get; set; } = false;
 }
 ```
