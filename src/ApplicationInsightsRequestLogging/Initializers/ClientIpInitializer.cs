@@ -5,20 +5,21 @@ using Microsoft.Extensions.Options;
 
 namespace Azureblue.ApplicationInsights.RequestLogging
 {
-    public class CloneIpAddress : ITelemetryInitializer
+    public class ClientIpInitializer : ITelemetryInitializer
     {
         private readonly BodyLoggerOptions _options;
 
-        public CloneIpAddress(IOptions<BodyLoggerOptions> options) => _options = options.Value;
+        public ClientIpInitializer(IOptions<BodyLoggerOptions> options) => _options = options.Value;
 
         public void Initialize(ITelemetry telemetry)
         {
             if (!_options.DisableIpMasking) return;
 
-            if (telemetry is ISupportProperties propTelemetry && !propTelemetry.Properties.ContainsKey("client-ip"))
+            var clientIpKey = _options.ClientIpPropertyKey;
+            if (telemetry is ISupportProperties propTelemetry && !propTelemetry.Properties.ContainsKey(clientIpKey))
             {
                 var clientIpValue = telemetry.Context.Location.Ip;
-                propTelemetry.Properties.Add("client-ip", clientIpValue);
+                propTelemetry.Properties.Add(clientIpKey, clientIpValue);
             }
         }
     }

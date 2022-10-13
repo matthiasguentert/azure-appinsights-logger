@@ -37,6 +37,11 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         public string ResponseBodyPropertyKey { get; set; } = "ResponseBody";
 
         /// <summary>
+        ///     Which property key should be used
+        /// </summary>
+        public string ClientIpPropertyKey { get; set; } = "ClientIp";
+        
+        /// <summary>
         ///     Defines the amount of bytes that should be read from HTTP context
         /// </summary>
         public int MaxBytes { get; set; } = 80000;

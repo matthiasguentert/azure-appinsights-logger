@@ -9,11 +9,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
-using System.Text;
-using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.DataContracts;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,7 +20,7 @@ namespace ApplicationInsightsRequestLoggingTests
         public void BodyLoggerMiddleware_Should_Throw_If_Ctor_Params_Null()
         {
             // Arrange & Act
-            Action action = () => { var middleware = new BodyLoggerMiddleware(null, null, null); };
+            var action = () => { var middleware = new BodyLoggerMiddleware(null, null, null); };
 
             // Assert
             action.Should().Throw<NullReferenceException>();
@@ -182,48 +177,6 @@ namespace ApplicationInsightsRequestLoggingTests
             // Assert
             var body = await response.Content.ReadAsStringAsync();
             body.Should().Be("Hello from terminating delegate!");
-        }
-        
-        [Fact(Skip = "Doesn't work yet. Currently unclear on how to properly mock the ServerTelemtryChannel and intercept data")]
-        public async void BodyLoggerMiddleware_Should_Disable_Ip_Masking()
-        {
-            // Arrange            
-            using var host = await new HostBuilder()
-                .ConfigureWebHost(webBuilder =>
-                {
-                    webBuilder
-                        .UseTestServer()
-                        .ConfigureServices(services =>
-                        {
-                            services.AddSingleton<FakeRemoteIpAddressMiddleware>();
-                            services.AddSingleton<FakeTelemetryChannel>();
-                            services.AddApplicationInsightsTelemetry();
-                            services.AddAppInsightsHttpBodyLogging(o =>
-                            {
-                                // Ensure middleware kicks in on success status
-                                o.HttpCodes.Add(StatusCodes.Status200OK);
-                                o.DisableIpMasking = true;
-                            });
-                        })
-                        .Configure(app =>
-                        {
-                            app.UseMiddleware<FakeRemoteIpAddressMiddleware>();
-                            app.UseAppInsightsHttpBodyLogging();
-                            app.Run(async context =>
-                            {
-                                // Send request body back in response body
-                                await context.Request.Body.CopyToAsync(context.Response.Body);
-                            });
-                        });
-                })
-                .StartAsync();
-
-            // Act
-            var response = await host.GetTestClient().PostAsync("/", new StringContent("Hello from client"));
-
-            // Assert
-            var body = await response.Content.ReadAsStringAsync();
-            body.Should().Be("Hello from client");
         }
     }
 }

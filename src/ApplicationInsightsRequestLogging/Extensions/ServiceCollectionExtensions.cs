@@ -30,18 +30,18 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             return services;
         }
 
-        private static void AddBodyLogger(IServiceCollection services)
-        {
-            services.AddScoped<BodyLoggerMiddleware>();
-            services.AddScoped<IBodyReader, BodyReader>();
-            services.AddScoped<ITelemetryWriter, TelemetryWriter>();
-            services.AddScoped<ITelemetryInitializer, CloneIpAddress>();
-        }
-
         private static void AddBodyLogger(IServiceCollection services, Action<BodyLoggerOptions> setupAction)
         {
             AddBodyLogger(services);
             services.Configure(setupAction);
+        }
+        
+        private static void AddBodyLogger(IServiceCollection services)
+        {
+            services.AddSingleton<BodyLoggerMiddleware>();
+            services.AddSingleton<IBodyReader, BodyReader>();
+            services.AddSingleton<ITelemetryWriter, TelemetryWriter>();
+            services.AddSingleton<ITelemetryInitializer, ClientIpInitializer>();
         }
     }
 }
