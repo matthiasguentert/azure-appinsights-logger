@@ -12,7 +12,6 @@ using System.Net.Http;
 using System.Threading;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
-using Microsoft.Extensions.Configuration;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -199,12 +198,9 @@ namespace ApplicationInsightsRequestLoggingTests
                             
                             // Register stub telemetry channel for testing
                             services.AddSingleton<ITelemetryChannel, FakeTelemetryChannel>();
-                            var config = new ConfigurationBuilder()
-                                .AddApplicationInsightsSettings(connectionString: string.Empty, endpointAddress: "http://localhost:1234/v2/track/")
-                                .Build();
                             
                             // Register app insights infrastructure
-                            services.AddApplicationInsightsTelemetry(config);
+                            services.AddApplicationInsightsTelemetry();
                             
                             // Add request body logging middleware
                             services.AddAppInsightsHttpBodyLogging(o =>
@@ -228,18 +224,20 @@ namespace ApplicationInsightsRequestLoggingTests
                 .StartAsync();
 
             // Act
-            var response = await host.GetTestClient().PostAsync("/", new StringContent("Hello from client"));
+            _ = await host.GetTestClient().PostAsync("/", new StringContent("Hello from client"));
             
             // Assert
-            Thread.Sleep(TimeSpan.FromSeconds(1)); // HELP
             var channel = host.Services.GetService<ITelemetryChannel>() as FakeTelemetryChannel;
-            var body = await response.Content.ReadAsStringAsync();
-            body.Should().Be("Hello from client");
-
             channel.Should().NotBeNull();
-            channel?.SentTelemtries.Should().HaveCount(1);
-            var requestItem = channel?.SentTelemtries.First() as RequestTelemetry;
             
+            // Unfortunately, threads can't be synchronized in a deterministic manner
+            SpinWait.SpinUntil(() =>
+            {
+                Thread.Sleep(10);
+                return channel?.SentTelemtries.Count >= 1;
+            }, TimeSpan.FromSeconds(3)).Should().BeTrue();
+            
+            var requestItem = channel?.SentTelemtries.First() as RequestTelemetry;
             requestItem.Should().NotBeNull();
             requestItem?.Properties["ClientIp"].Should().Be("127.168.1.32");
         }
