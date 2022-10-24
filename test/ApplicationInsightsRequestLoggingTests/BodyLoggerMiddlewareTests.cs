@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
+using System.Threading;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.DataContracts;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -177,6 +180,66 @@ namespace ApplicationInsightsRequestLoggingTests
             // Assert
             var body = await response.Content.ReadAsStringAsync();
             body.Should().Be("Hello from terminating delegate!");
+        }
+        
+        [Fact]
+        public async void BodyLoggerMiddleware_Should_Disable_Ip_Masking()
+        {
+            // Arrange            
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureTestServices(services =>
+                        {
+                            // Set fake client IP 
+                            services.AddSingleton<FakeRemoteIpAddressMiddleware>();
+                            
+                            // Register stub telemetry channel for testing
+                            services.AddSingleton<ITelemetryChannel, FakeTelemetryChannel>();
+                            
+                            // Register app insights infrastructure
+                            services.AddApplicationInsightsTelemetry();
+                            
+                            // Add request body logging middleware
+                            services.AddAppInsightsHttpBodyLogging(o =>
+                            {
+                                // Ensure middleware kicks in on success status
+                                o.HttpCodes.Add(StatusCodes.Status200OK);
+                                o.DisableIpMasking = true;
+                            });
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseMiddleware<FakeRemoteIpAddressMiddleware>();
+                            app.UseAppInsightsHttpBodyLogging();
+                            app.Run(async context =>
+                            {
+                                // Send request body back in response body
+                                await context.Request.Body.CopyToAsync(context.Response.Body);
+                            });
+                        });
+                })
+                .StartAsync();
+
+            // Act
+            _ = await host.GetTestClient().PostAsync("/", new StringContent("Hello from client"));
+            
+            // Assert
+            var channel = host.Services.GetService<ITelemetryChannel>() as FakeTelemetryChannel;
+            channel.Should().NotBeNull();
+            
+            // Unfortunately, threads can't be synchronized in a deterministic manner
+            SpinWait.SpinUntil(() =>
+            {
+                Thread.Sleep(10);
+                return channel?.SentTelemtries.Count >= 1;
+            }, TimeSpan.FromSeconds(3)).Should().BeTrue();
+            
+            var requestItem = channel?.SentTelemtries.First() as RequestTelemetry;
+            requestItem.Should().NotBeNull();
+            requestItem?.Properties["ClientIp"].Should().Be("127.168.1.32");
         }
     }
 }

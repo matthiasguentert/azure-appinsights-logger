@@ -39,3 +39,5 @@ void ConfigureEndpoints(IEndpointRouteBuilder app, IServiceProvider services)
 {
     app.MapControllers();
 }
+
+public partial class Program { }

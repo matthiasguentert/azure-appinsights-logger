@@ -14,5 +14,4 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\ApplicationInsightsRequestLogging\ApplicationInsightsRequestLogging.csproj" />
     </ItemGroup>
-
 </Project>
