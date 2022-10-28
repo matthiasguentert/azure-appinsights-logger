@@ -44,7 +44,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         /// <summary>
         ///     Defines the amount of bytes that should be read from HTTP context
         /// </summary>
-        public int MaxBytes { get; set; } = 80000;
+        public int MaxBytes { get; set; } = 1000;
 
         /// <summary>
         ///     Defines the text to append in case the body should be truncated <seealso cref="MaxBytes"/>
