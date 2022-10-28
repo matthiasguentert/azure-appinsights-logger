@@ -11,6 +11,12 @@ namespace ManualTests.Controllers
         {
             return Ok(data);
         }
+
+        [HttpPost("maxbytes")]
+        public ActionResult<string> MaxBytesTest([FromForm] string data)
+        {
+            return Ok(data);
+        }
     }
 }
 
