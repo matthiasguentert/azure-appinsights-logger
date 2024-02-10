@@ -88,6 +88,7 @@ namespace ApplicationInsightsRequestLoggingTests
                         {
                             services.AddTransient<IBodyReader, BodyReader>();
                             services.AddSingleton(telemetryWriter.Object);
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
                             services.AddTransient<BodyLoggerMiddleware>();
                         })
                         .Configure(app =>
@@ -163,6 +164,7 @@ namespace ApplicationInsightsRequestLoggingTests
                         .ConfigureServices(services =>
                         {
                             services.AddAppInsightsHttpBodyLogging();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
                         })
                         .Configure(app =>
                         {
