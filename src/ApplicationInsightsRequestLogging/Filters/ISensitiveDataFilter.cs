@@ -1,4 +1,4 @@
-﻿namespace Azureblue.ApplicationInsights.RequestLogging.SensitiveDataFilter
+﻿namespace Azureblue.ApplicationInsights.RequestLogging.Filters
 {
     public interface ISensitiveDataFilter
     {

@@ -1,4 +1,4 @@
-﻿using Azureblue.ApplicationInsights.RequestLogging.SensitiveDataFilter;
+﻿using Azureblue.ApplicationInsights.RequestLogging.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using System;

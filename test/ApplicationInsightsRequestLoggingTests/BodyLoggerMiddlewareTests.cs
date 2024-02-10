@@ -14,6 +14,7 @@ using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
+using Azureblue.ApplicationInsights.RequestLogging.Filters;
 
 namespace ApplicationInsightsRequestLoggingTests
 {
@@ -23,7 +24,7 @@ namespace ApplicationInsightsRequestLoggingTests
         public void BodyLoggerMiddleware_Should_Throw_If_Ctor_Params_Null()
         {
             // Arrange & Act
-            var action = () => { var middleware = new BodyLoggerMiddleware(null, null, null); };
+            var action = () => { var middleware = new BodyLoggerMiddleware(null, null, null, null); };
 
             // Assert
             action.Should().Throw<NullReferenceException>();
@@ -43,6 +44,7 @@ namespace ApplicationInsightsRequestLoggingTests
                         .ConfigureServices(services =>
                         {
                             services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
                             services.AddSingleton(telemetryWriter.Object);
                             services.AddTransient<BodyLoggerMiddleware>();
                         })
