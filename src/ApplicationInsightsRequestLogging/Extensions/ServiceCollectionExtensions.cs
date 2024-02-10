@@ -1,5 +1,4 @@
-﻿using Azureblue.ApplicationInsights.RequestLogging.Filters;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using Microsoft.ApplicationInsights.Extensibility;
 

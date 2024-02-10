@@ -14,7 +14,6 @@ using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
-using Azureblue.ApplicationInsights.RequestLogging.Filters;
 
 namespace ApplicationInsightsRequestLoggingTests
 {
