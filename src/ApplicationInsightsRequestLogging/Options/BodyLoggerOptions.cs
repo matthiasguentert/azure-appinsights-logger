@@ -21,7 +21,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         /// </summary>
         public List<string> HttpVerbs { get; set; } = new List<string>()
         {
-            HttpMethods.Post, 
+            HttpMethods.Post,
             HttpMethods.Put,
             HttpMethods.Patch
         };
@@ -55,5 +55,17 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         ///     Controls storage of client IP addresses https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-collection?tabs=net
         /// </summary>
         public bool DisableIpMasking { get; set; } = false;
+        public IEnumerable<string> PropertiesWithSensitiveData { get; set; } = new List<string>()
+        {
+            "password",
+            "secret",
+            "passwd",
+            "api_key",
+            "access_token",
+            "accessToken",
+            "auth",
+            "credentials",
+            "mysql_pwd"
+        };
     }
 }
