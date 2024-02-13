@@ -55,6 +55,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         ///     Controls storage of client IP addresses https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-collection?tabs=net
         /// </summary>
         public bool DisableIpMasking { get; set; } = false;
+
         public List<string> PropertyNamesWithSensitiveData { get; set; } = new List<string>()
         {
             "password",
