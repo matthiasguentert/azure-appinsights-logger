@@ -14,6 +14,7 @@ using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 
 namespace ApplicationInsightsRequestLoggingTests
 {
@@ -23,7 +24,7 @@ namespace ApplicationInsightsRequestLoggingTests
         public void BodyLoggerMiddleware_Should_Throw_If_Ctor_Params_Null()
         {
             // Arrange & Act
-            var action = () => { var middleware = new BodyLoggerMiddleware(null, null, null); };
+            var action = () => { var middleware = new BodyLoggerMiddleware(null, null, null, null); };
 
             // Assert
             action.Should().Throw<NullReferenceException>();
@@ -43,6 +44,7 @@ namespace ApplicationInsightsRequestLoggingTests
                         .ConfigureServices(services =>
                         {
                             services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
                             services.AddSingleton(telemetryWriter.Object);
                             services.AddTransient<BodyLoggerMiddleware>();
                         })
@@ -87,6 +89,7 @@ namespace ApplicationInsightsRequestLoggingTests
                         {
                             services.AddTransient<IBodyReader, BodyReader>();
                             services.AddSingleton(telemetryWriter.Object);
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
                             services.AddTransient<BodyLoggerMiddleware>();
                         })
                         .Configure(app =>
@@ -151,6 +154,48 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
         [Fact]
+        public async void BodyLoggerMiddleware_Should_Redact_Password()
+        {
+            // Arrange
+            var telemetryWriter = new Mock<ITelemetryWriter>();
+
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureServices(services =>
+                        {
+                            services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddTransient<ISensitiveDataFilter>(provider =>
+                            {
+                                return new SensitiveDataFilter(new List<string>() { "password" }, new List<string>());
+                            });
+                            services.AddSingleton(telemetryWriter.Object);
+                            services.AddTransient<BodyLoggerMiddleware>();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseMiddleware<BodyLoggerMiddleware>();
+                            app.Run(async context =>
+                            {
+                                // Send request body back in response body
+                                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                                await context.Request.Body.CopyToAsync(context.Response.Body);
+                            });
+                        });
+                })
+                .StartAsync();
+
+            // Act
+            var response = await host.GetTestClient().PostAsync("/", new StringContent("{\"email\":\"fred@mayekawa.com\",\"password\":\"P@ssw0rd!\"}"));
+
+            // Assert
+            telemetryWriter.Verify(x => x.Write(It.IsAny<HttpContext>(), "RequestBody", "{\"email\":\"fred@mayekawa.com\",\"password\":\"***MASKED***\"}"), Times.Once);
+            telemetryWriter.Verify(x => x.Write(It.IsAny<HttpContext>(), "ResponseBody", "{\"email\":\"fred@mayekawa.com\",\"password\":\"***MASKED***\"}"), Times.Once);
+        }
+
+        [Fact]
         public async void BodyLoggerMiddleware_Should_Properly_Pass()
         {
             // Arrange            
@@ -162,6 +207,7 @@ namespace ApplicationInsightsRequestLoggingTests
                         .ConfigureServices(services =>
                         {
                             services.AddAppInsightsHttpBodyLogging();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
                         })
                         .Configure(app =>
                         {

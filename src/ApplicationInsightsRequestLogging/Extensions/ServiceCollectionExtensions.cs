@@ -34,6 +34,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         {
             AddBodyLogger(services);
             services.Configure(setupAction);
+            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
         }
         
         private static void AddBodyLogger(IServiceCollection services)
