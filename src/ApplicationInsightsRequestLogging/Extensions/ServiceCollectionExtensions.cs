@@ -34,15 +34,15 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         {
             AddBodyLogger(services);
             services.Configure(setupAction);
-            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
         }
-        
+
         private static void AddBodyLogger(IServiceCollection services)
         {
             services.AddScoped<BodyLoggerMiddleware>();
             services.AddScoped<IBodyReader, BodyReader>();
             services.AddScoped<ITelemetryWriter, TelemetryWriter>();
             services.AddSingleton<ITelemetryInitializer, ClientIpInitializer>();
+            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
         }
     }
 }
