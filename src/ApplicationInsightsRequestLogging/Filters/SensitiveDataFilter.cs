@@ -11,7 +11,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
     {
         private const string SensitiveValueMask = "***MASKED***";
 
-        public readonly HashSet<string> _sensitiveDataPropertyKeys;
+        private readonly HashSet<string> _sensitiveDataPropertyKeys;
         private readonly IEnumerable<string> _regexesForSensitiveValues;
 
 

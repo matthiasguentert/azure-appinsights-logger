@@ -17,7 +17,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _bodyReader = bodyReader ?? throw new ArgumentNullException(nameof(bodyReader));
             _telemetryWriter = telemetryWriter ?? throw new ArgumentNullException(nameof(telemetryWriter));
-            _sensitiveDataFilter = sensitiveDataFilter ?? throw new ArgumentNullException(nameof(telemetryWriter));
+            _sensitiveDataFilter = sensitiveDataFilter ?? throw new ArgumentNullException(nameof(sensitiveDataFilter));
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
