@@ -29,6 +29,48 @@ namespace ApplicationInsightsRequestLoggingTests
             // Assert
             action.Should().Throw<NullReferenceException>();
         }
+        
+        [Fact]
+        public async void BodyLoggerMiddleware_Should_LogRequestBody_If_Downstream_Exception_Occurs()
+        {
+            // Arrange
+            var telemetryWriter = new Mock<ITelemetryWriter>();
+            
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureServices(services =>
+                        {
+                            services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
+                            services.AddSingleton(telemetryWriter.Object);
+                            services.AddTransient<BodyLoggerMiddleware>();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseMiddleware<BodyLoggerMiddleware>();
+                            app.Run( _ => throw new Exception("downstream exception"));
+                        });
+                })
+                .StartAsync();
+            
+            // Act
+            try
+            {
+                await host.GetTestClient().PostAsync("/", new StringContent("Hello from client"));
+            }
+            catch (Exception)
+            {
+                //ignore errors thrown by test client
+            }
+            
+            // Assert
+            telemetryWriter.Verify(x => x.Write(It.IsAny<HttpContext>(), "RequestBody", "Hello from client"), Times.Once);
+            
+        }
+
 
         [Fact]
         public async void BodyLoggerMiddleware_Should_Send_Data_To_AppInsights()

@@ -32,7 +32,18 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             }
 
             // hand over to the next middleware and wait for the call to return
-            await next(context);
+            try
+            {
+                await next(context);
+            }
+            catch (Exception)
+            {
+                if (_options.HttpVerbs.Contains(context.Request.Method))
+                {
+                    _telemetryWriter.Write(context, _options.RequestBodyPropertyKey, _sensitiveDataFilter.RemoveSensitiveData(requestBody));
+                }
+                throw;
+            }
 
             if (_options.HttpVerbs.Contains(context.Request.Method))
             {
