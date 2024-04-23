@@ -33,7 +33,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 
             if (_options.EnableBodyLoggingOnExceptions)
             {
-                // hand over to the next middleware and wait for the call to return
+                // Hand over to the next middleware and wait for the call to return
                 try
                 {
                     await next(context);
@@ -42,8 +42,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                 {
                     if (_options.HttpVerbs.Contains(context.Request.Method))
                     {
-                        _telemetryWriter.Write(context, _options.RequestBodyPropertyKey,
-                            _sensitiveDataFilter.RemoveSensitiveData(requestBody));
+                        _telemetryWriter.Write(context, _options.RequestBodyPropertyKey, _sensitiveDataFilter.RemoveSensitiveData(requestBody));
                     }
 
                     throw;
@@ -63,7 +62,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                     _telemetryWriter.Write(context, _options.RequestBodyPropertyKey, _sensitiveDataFilter.RemoveSensitiveData(requestBody));
                     _telemetryWriter.Write(context, _options.ResponseBodyPropertyKey, _sensitiveDataFilter.RemoveSensitiveData(responseBody));
                 }
-                
+
                 // Copy back so response body is available for the user agent
                 // prevent 500 error when Not StatusCode of Interest
                 await _bodyReader.RestoreOriginalResponseBodyStreamAsync(context);
