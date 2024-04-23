@@ -31,18 +31,27 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                 _bodyReader.PrepareResponseBodyReading(context);
             }
 
-            // hand over to the next middleware and wait for the call to return
-            try
+            if (_options.EnableBodyLoggingOnExceptions)
+            {
+                // hand over to the next middleware and wait for the call to return
+                try
+                {
+                    await next(context);
+                }
+                catch (Exception)
+                {
+                    if (_options.HttpVerbs.Contains(context.Request.Method))
+                    {
+                        _telemetryWriter.Write(context, _options.RequestBodyPropertyKey,
+                            _sensitiveDataFilter.RemoveSensitiveData(requestBody));
+                    }
+
+                    throw;
+                }
+            }
+            else
             {
                 await next(context);
-            }
-            catch (Exception)
-            {
-                if (_options.HttpVerbs.Contains(context.Request.Method))
-                {
-                    _telemetryWriter.Write(context, _options.RequestBodyPropertyKey, _sensitiveDataFilter.RemoveSensitiveData(requestBody));
-                }
-                throw;
             }
 
             if (_options.HttpVerbs.Contains(context.Request.Method))

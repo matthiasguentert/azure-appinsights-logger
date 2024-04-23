@@ -31,7 +31,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
         
         [Fact]
-        public async void BodyLoggerMiddleware_Should_LogRequestBody_If_Downstream_Exception_Occurs()
+        public async void BodyLoggerMiddleware_Should_Not_LogRequestBody_If_Downstream_Exception_And_Disabled()
         {
             // Arrange
             var telemetryWriter = new Mock<ITelemetryWriter>();
@@ -46,6 +46,55 @@ namespace ApplicationInsightsRequestLoggingTests
                             services.AddTransient<IBodyReader, BodyReader>();
                             services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
                             services.AddSingleton(telemetryWriter.Object);
+                            services.AddOptions<BodyLoggerOptions>().Configure(options =>
+                            {
+                                options.EnableBodyLoggingOnExceptions = false;
+                            });
+                            services.AddTransient<BodyLoggerMiddleware>();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseMiddleware<BodyLoggerMiddleware>();
+                            app.Run( _ => throw new Exception("downstream exception"));
+                        });
+                })
+                .StartAsync();
+            
+            // Act
+            try
+            {
+                await host.GetTestClient().PostAsync("/", new StringContent("Hello from client"));
+            }
+            catch (Exception)
+            {
+                //ignore errors thrown by test client
+            }
+            
+            // Assert
+            telemetryWriter.VerifyNoOtherCalls();
+            
+        }
+        
+        [Fact]
+        public async void BodyLoggerMiddleware_Should_LogRequestBody_If_Downstream_Exception_And_Enabled()
+        {
+            // Arrange
+            var telemetryWriter = new Mock<ITelemetryWriter>();
+            
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureServices(services =>
+                        {
+                            services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
+                            services.AddSingleton(telemetryWriter.Object);
+                            services.AddOptions<BodyLoggerOptions>().Configure(options =>
+                            {
+                                options.EnableBodyLoggingOnExceptions = true;
+                            });
                             services.AddTransient<BodyLoggerMiddleware>();
                         })
                         .Configure(app =>
