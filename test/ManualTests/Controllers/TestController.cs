@@ -17,12 +17,11 @@ namespace ManualTests.Controllers
         {
             return Ok(data);
         }
-    }
-}
 
-public class TestData
-{
-    public string Name { get; set; }
-    public string Blog { get; set; }
-    public string Topics { get; set; }
+        [HttpPost("throw")]
+        public ActionResult<string> ThrowException([FromBody] TestData data)
+        {
+            throw new InvalidOperationException("Test exception!");
+        }
+    }
 }

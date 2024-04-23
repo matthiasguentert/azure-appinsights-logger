@@ -132,5 +132,16 @@ public class BodyLoggerOptions
     ///     Controls storage of client IP addresses https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-collection?tabs=net
     /// </summary>
     public bool DisableIpMasking { get; set; } = false;
+    
+    /// <summary>
+    ///     Controls if the middleware should catch and rethrow exceptions to allow logging of request bodies
+    ///     even if downstream middlewares or handlers throw.
+    /// </summary>
+    /// <remarks>
+    ///     In some edge cases this might interfere with custom exception handlers or other middlewares catching exceptions.
+    ///     If you enable this feature, make sure that the body logger middleware is registered as early as possible
+    ///     on host creation.
+    /// </remarks>
+    public bool EnableBodyLoggingOnExceptions { get; set; } = false;
 }
 ```

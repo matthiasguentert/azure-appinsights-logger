@@ -12,14 +12,16 @@ ConfigureEndpoints(app, app.Services);
 
 app.Run();
 
-void ConfigureConfiguration(ConfigurationManager configuration) {}
+void ConfigureConfiguration(ConfigurationManager configuration) { }
 void ConfigureServices(IServiceCollection services)
 {
     services.AddApplicationInsightsTelemetry();
     services.AddAppInsightsHttpBodyLogging(o =>
     {
         o.HttpCodes.Add(StatusCodes.Status200OK);
+        o.HttpCodes.Add(StatusCodes.Status204NoContent);
         o.DisableIpMasking = true;
+        o.EnableBodyLoggingOnExceptions = true;
     });
     services.AddControllers();
     services.AddEndpointsApiExplorer();
