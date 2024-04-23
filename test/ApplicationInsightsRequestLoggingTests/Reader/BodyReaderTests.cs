@@ -10,7 +10,7 @@ namespace ApplicationInsightsRequestLoggingTests.Reader
     public class BodyReaderTests
     {
         [Fact]
-        public async Task Should_Read_Request_Body_And_Truncate()
+        public async Task Should_read_request_body_and_truncate()
         {
             // Arrange
             var reader = new BodyReader();
@@ -25,7 +25,7 @@ namespace ApplicationInsightsRequestLoggingTests.Reader
         }
 
         [Fact]
-        public async Task Should_Read_Full_Request()
+        public async Task Should_read_full_request()
         {
             // Arrange
             var reader = new BodyReader();
@@ -40,7 +40,7 @@ namespace ApplicationInsightsRequestLoggingTests.Reader
         }
 
         [Fact]
-        public void Should_Throw_If_PrepareResponseBodyReading_Has_Not_Been_Called()
+        public void Should_throw_if_PrepareResponseBodyReading_has_not_been_called()
         {
             // Arrange
             var reader = new BodyReader();
@@ -54,22 +54,6 @@ namespace ApplicationInsightsRequestLoggingTests.Reader
 
             // Assert
             action.Should().ThrowAsync<ArgumentNullException>().WithMessage("Call PrepareResponseBodyReading() before passing control to the next delegate!");
-        }
-
-        [Fact(Skip = "Doesn't make sense yet!")]
-        public async Task Should_Read_Full_Response()
-        {
-            // Arrange
-            var reader = new BodyReader();
-            var responseBody = "Hello from test environment";
-            var context = HttpContextTestFactory.CreateWithResponseBody(responseBody);
-
-            // Act
-            reader.PrepareResponseBodyReading(context);
-            var result = await reader.ReadResponseBodyAsync(context, responseBody.Length, string.Empty);
-
-            // Assert
-            result.Should().Be("Hello from test environment\r\n");
         }
     }
 }

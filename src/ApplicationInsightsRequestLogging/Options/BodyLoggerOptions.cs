@@ -40,7 +40,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         ///     Which property key should be used
         /// </summary>
         public string ClientIpPropertyKey { get; set; } = "ClientIp";
-        
+
         /// <summary>
         ///     Defines the amount of bytes that should be read from HTTP context
         /// </summary>
@@ -49,7 +49,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         /// <summary>
         ///     Defines the text to append in case the body should be truncated <seealso cref="MaxBytes"/>
         /// </summary>
-        public string Appendix { get; set; } = "\n---8<------------------------\nTRUNCATED DUE TO MAXBYTES LIMIT";
+        public string Appendix { get; set; } = "***TRUNCATED***";
 
         /// <summary>
         ///     Controls storage of client IP addresses https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-collection?tabs=net
