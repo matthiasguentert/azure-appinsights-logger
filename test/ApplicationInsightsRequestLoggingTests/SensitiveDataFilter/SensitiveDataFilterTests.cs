@@ -1,5 +1,6 @@
 using Azureblue.ApplicationInsights.RequestLogging;
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
@@ -13,8 +14,14 @@ namespace ApplicationInsightsRequestLoggingTests.Filters
         public void Should_mask_tokens_with_sensitive_data_from_json()
         {
             // Arrange
+            var bodyLoggerOptions = new BodyLoggerOptions
+            {
+                PropertyNamesWithSensitiveData = new List<string>() { "token" },
+                SensitiveDataRegexes = new List<string>()
+            };
+
             var jsonWithToken = JsonSerializer.Serialize(new { token = "some-super-secret-token" });
-            var filter = new SensitiveDataFilter(sensitiveDataPropertyKeys: new HashSet<string> { "token" }, regexesForSensitiveValues: Array.Empty<string>());
+            var filter = new SensitiveDataFilter(Options.Create(bodyLoggerOptions));
 
             // Act
             var result = filter.RemoveSensitiveData(jsonWithToken);
@@ -28,8 +35,14 @@ namespace ApplicationInsightsRequestLoggingTests.Filters
         public void Should_mask_tokens_with_sensitive_data_from_nested_object_json()
         {
             // Arrange
+            var bodyLoggerOptions = new BodyLoggerOptions
+            {
+                PropertyNamesWithSensitiveData = new List<string>() { "password" },
+                SensitiveDataRegexes = new List<string>()
+            };
+
             var jsonWithToken = JsonSerializer.Serialize(new { someObject = new { password = "some-super-secret-token" } });
-            var filter = new SensitiveDataFilter(sensitiveDataPropertyKeys: new HashSet<string> { "password" }, regexesForSensitiveValues: Array.Empty<string>());
+            var filter = new SensitiveDataFilter(Options.Create(bodyLoggerOptions));
 
             // Act
             var result = filter.RemoveSensitiveData(jsonWithToken);
@@ -43,8 +56,14 @@ namespace ApplicationInsightsRequestLoggingTests.Filters
         public void Should_mask_tokens_with_sensitive_data_even_if_its_not_equal_match_json()
         {
             // Arrange
+            var bodyLoggerOptions = new BodyLoggerOptions
+            {
+                PropertyNamesWithSensitiveData = new List<string>() { "password" },
+                SensitiveDataRegexes = new List<string>()
+            };
+
             var jsonWithToken = JsonSerializer.Serialize(new { someObject = new { userPassword = "some-super-secret-token" } });
-            var filter = new SensitiveDataFilter(sensitiveDataPropertyKeys: new HashSet<string> { "password" }, regexesForSensitiveValues: Array.Empty<string>());
+            var filter = new SensitiveDataFilter(Options.Create(bodyLoggerOptions));
 
             // Act
             var result = filter.RemoveSensitiveData(jsonWithToken);
@@ -61,8 +80,14 @@ namespace ApplicationInsightsRequestLoggingTests.Filters
         public void Should_mask_values_based_on_regex()
         {
             // Arrange
+            var bodyLoggerOptions = new BodyLoggerOptions
+            {
+                PropertyNamesWithSensitiveData = new List<string>() { "password" },
+                SensitiveDataRegexes = new List<string> { CreditCardRegex }
+            };
+
             var jsonWithToken = JsonSerializer.Serialize(new { someObject = new { randomTokenName = SampleCreditCardNumber } });
-            var filter = new SensitiveDataFilter(sensitiveDataPropertyKeys: new HashSet<string> { "password" }, regexesForSensitiveValues: new List<string> { CreditCardRegex });
+            var filter = new SensitiveDataFilter(Options.Create(bodyLoggerOptions));
 
             // Act
             var result = filter.RemoveSensitiveData(jsonWithToken);
@@ -76,8 +101,14 @@ namespace ApplicationInsightsRequestLoggingTests.Filters
         public void SensitiveDataFilter_should_remove_creditcard_number_from_plain_text_if_configured()
         {
             // Arrange
+            var bodyLoggerOptions = new BodyLoggerOptions
+            {
+                PropertyNamesWithSensitiveData = new List<string>() { "token" },
+                SensitiveDataRegexes = new List<string> { CreditCardRegex }
+            };
+
             var plainTextWithToken = $"token: some-not-so-{SampleCreditCardNumber}secret-token-but-with-cc-inside";
-            var filter = new SensitiveDataFilter(sensitiveDataPropertyKeys: new HashSet<string> { "token" }, regexesForSensitiveValues: new List<string> { CreditCardRegex });
+            var filter = new SensitiveDataFilter(Options.Create(bodyLoggerOptions));
 
             // Act
             var result = filter.RemoveSensitiveData(plainTextWithToken);

@@ -15,6 +15,7 @@ using Microsoft.ApplicationInsights.DataContracts;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 
 namespace ApplicationInsightsRequestLoggingTests
 {
@@ -43,13 +44,13 @@ namespace ApplicationInsightsRequestLoggingTests
                         .UseTestServer()
                         .ConfigureServices(services =>
                         {
-                            services.AddTransient<IBodyReader, BodyReader>();
-                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
-                            services.AddSingleton(telemetryWriter.Object);
                             services.AddOptions<BodyLoggerOptions>().Configure(options =>
                             {
                                 options.EnableBodyLoggingOnExceptions = false;
                             });
+                            services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
+                            services.AddSingleton(telemetryWriter.Object);
                             services.AddTransient<BodyLoggerMiddleware>();
                         })
                         .Configure(app =>
@@ -87,13 +88,13 @@ namespace ApplicationInsightsRequestLoggingTests
                         .UseTestServer()
                         .ConfigureServices(services =>
                         {
-                            services.AddTransient<IBodyReader, BodyReader>();
-                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
-                            services.AddSingleton(telemetryWriter.Object);
                             services.AddOptions<BodyLoggerOptions>().Configure(options =>
                             {
                                 options.EnableBodyLoggingOnExceptions = true;
                             });
+                            services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
+                            services.AddSingleton(telemetryWriter.Object);
                             services.AddTransient<BodyLoggerMiddleware>();
                         })
                         .Configure(app =>
@@ -254,11 +255,13 @@ namespace ApplicationInsightsRequestLoggingTests
                         .UseTestServer()
                         .ConfigureServices(services =>
                         {
-                            services.AddTransient<IBodyReader, BodyReader>();
-                            services.AddTransient<ISensitiveDataFilter>(provider =>
+                            services.AddOptions<BodyLoggerOptions>().Configure(options =>
                             {
-                                return new SensitiveDataFilter(new List<string>() { "password" }, new List<string>());
+                                options.PropertyNamesWithSensitiveData = new List<string> { "password" };
+                                options.SensitiveDataRegexes = new List<string>();
                             });
+                            services.AddTransient<IBodyReader, BodyReader>();
+                            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
                             services.AddSingleton(telemetryWriter.Object);
                             services.AddTransient<BodyLoggerMiddleware>();
                         })

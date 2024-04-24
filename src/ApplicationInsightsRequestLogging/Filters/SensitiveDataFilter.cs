@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Options;
 
 namespace Azureblue.ApplicationInsights.RequestLogging
 {
@@ -14,16 +15,10 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         private readonly HashSet<string> _sensitiveDataPropertyKeys;
         private readonly IEnumerable<string> _regexesForSensitiveValues;
 
-
-        public SensitiveDataFilter(BodyLoggerOptions options) : this(options.PropertyNamesWithSensitiveData, options.SensitiveDataRegexes)
+        public SensitiveDataFilter(IOptions<BodyLoggerOptions> options)
         {
-
-        }
-
-        public SensitiveDataFilter(IEnumerable<string> sensitiveDataPropertyKeys, IEnumerable<string> regexesForSensitiveValues)
-        {
-            _sensitiveDataPropertyKeys = sensitiveDataPropertyKeys.Select(t => t.ToLowerInvariant()).ToHashSet();
-            _regexesForSensitiveValues = regexesForSensitiveValues;
+            _sensitiveDataPropertyKeys = options.Value.PropertyNamesWithSensitiveData.Select(t => t.ToLowerInvariant()).ToHashSet();
+            _regexesForSensitiveValues = options.Value.SensitiveDataRegexes;
         }
 
         public string RemoveSensitiveData(string textOrJson)
@@ -33,7 +28,8 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                 var json = JsonNode.Parse(textOrJson);
                 if (json == null) return string.Empty;
 
-                if (json is JsonValue jValue && TestIfContainsSensitiveData("", jValue.ToString(), _sensitiveDataPropertyKeys, _regexesForSensitiveValues))
+                if (json is JsonValue jValue &&
+                TestIfContainsSensitiveData("", jValue.ToString(), _sensitiveDataPropertyKeys, _regexesForSensitiveValues))
                 {
                     return SensitiveValueMask;
                 }

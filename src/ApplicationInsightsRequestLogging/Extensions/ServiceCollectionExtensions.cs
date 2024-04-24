@@ -42,7 +42,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             services.AddScoped<IBodyReader, BodyReader>();
             services.AddScoped<ITelemetryWriter, TelemetryWriter>();
             services.AddSingleton<ITelemetryInitializer, ClientIpInitializer>();
-            services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
+            services.AddScoped<ISensitiveDataFilter, SensitiveDataFilter>();
         }
     }
 }
