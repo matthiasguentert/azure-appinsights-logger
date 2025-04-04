@@ -17,6 +17,7 @@ This nuget package provides a custom middleware that allows to write the body of
 - Disable IP masking without the need to modify the App Insights resource as described [here](https://learn.microsoft.com/en-us/azure/azure-monitor/app/ip-collection?tabs=net)
 - Optionally log request body even in case a downstream middleware or handler throws
 - Allows redacting sensitive data like tokens, passwords, credit card numbers, etc.
+- Allows excluding specific content-types
 
 > A word of warning! Writing the content of an HTTP body to Application Insights might reveal sensitive user information that otherwise would be hidden and protected in transfer via TLS. So use this middleware with care - with great power comes great responsibility (I always wanted to say that...)!
 
@@ -78,7 +79,7 @@ services.AddAppInsightsHttpBodyLogging(o => {
 });
 ```
 
-...or stick with the defaults which are defined in [`BodyLoggerOptions`](https://github.com/matthiasguentert/azure-appinsights-logger/blob/500185bdb1a73bd74cb9a512ca954e1afc494872/src/ApplicationInsightsRequestLogging/Options/BodyLoggerOptions.cs).
+...or stick with the defaults which are defined in `BodyLoggerOptions.cs`.
 
 ## Acknowledgement
 

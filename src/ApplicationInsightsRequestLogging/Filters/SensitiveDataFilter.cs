@@ -86,7 +86,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
 
             foreach (var jNode in jArray.Where(v => v != null))
             {
-                RemoveIds(jNode);
+                RemoveIds(jNode ?? throw new InvalidOperationException());
             }
         }
 

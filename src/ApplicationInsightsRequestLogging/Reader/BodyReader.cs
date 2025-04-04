@@ -110,7 +110,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                 throw new ArgumentNullException(nameof(_originalResponseBodyStream), "Call PrepareResponseBodyReading() before passing control to the next delegate!");
             }
 
-            await this.RestoreOriginalResponseStream(context);
+            await RestoreOriginalResponseStream(context);
         }
 
         private async Task RestoreOriginalResponseStream(HttpContext context)
@@ -118,9 +118,16 @@ namespace Azureblue.ApplicationInsights.RequestLogging
             if (!_originalResponseStreamReturned)
             {
                 // Copy back so response body is available for the user agent
-                _memoryStream.Position = 0;
-                await _memoryStream.CopyToAsync(_originalResponseBodyStream);
-                
+                if (_memoryStream != null)
+                {
+                    _memoryStream.Position = 0;
+                    await _memoryStream.CopyToAsync(_originalResponseBodyStream);
+                }
+                else
+                {
+                    throw new ArgumentNullException(nameof(_memoryStream));
+                }
+
                 context.Response.Body = _originalResponseBodyStream;
                 _originalResponseStreamReturned = true;
             }
