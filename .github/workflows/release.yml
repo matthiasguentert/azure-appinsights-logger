@@ -32,7 +32,7 @@ jobs:
         run: dotnet build -c Release
           
       - name: Test
-        run: dotnet test -c Release -r ${{ env.ARTIFACT_PATH }} --no-build -l trx --verbosity=normal
+        run: dotnet test -c Release --no-build -l trx --verbosity=normal --results-directory "${{ env.ARTIFACT_PATH }}"
 
       - name: Pack
         run: dotnet pack -c Release -o ${{ env.ARTIFACT_PATH }} --no-build
@@ -41,7 +41,7 @@ jobs:
         run: dotnet nuget push ${{ env.ARTIFACT_PATH }}/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source "https://api.nuget.org/v3/index.json"
         
       - name: Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4  
         with:
           name: artifacts
           path: ${{ env.ARTIFACT_PATH }}/**/*
