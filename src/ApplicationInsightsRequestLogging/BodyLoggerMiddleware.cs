@@ -23,7 +23,8 @@ namespace Azureblue.ApplicationInsights.RequestLogging
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var requestBody = string.Empty;
-            if (_options.HttpVerbs.Contains(context.Request.Method))
+            var enableLogging = _options.HttpVerbs.Contains(context.Request.Method) && !_options.IsExcludedContentType(context.Request.ContentType);
+            if (enableLogging)
             {
                 // Temporarily store request body
                 requestBody = await _bodyReader.ReadRequestBodyAsync(context, _options.MaxBytes, _options.Appendix);
@@ -40,7 +41,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                 }
                 catch (Exception)
                 {
-                    if (_options.HttpVerbs.Contains(context.Request.Method))
+                    if (enableLogging)
                     {
                         _telemetryWriter.Write(context, _options.RequestBodyPropertyKey, _sensitiveDataFilter.RemoveSensitiveData(requestBody));
                     }
@@ -53,7 +54,7 @@ namespace Azureblue.ApplicationInsights.RequestLogging
                 await next(context);
             }
 
-            if (_options.HttpVerbs.Contains(context.Request.Method))
+            if (enableLogging)
             {
                 if (_options.HttpCodes.Contains(context.Response.StatusCode))
                 {
