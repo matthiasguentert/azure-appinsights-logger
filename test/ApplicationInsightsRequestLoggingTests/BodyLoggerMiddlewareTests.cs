@@ -15,7 +15,7 @@ using Microsoft.ApplicationInsights.DataContracts;
 using Moq;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
-using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace ApplicationInsightsRequestLoggingTests
 {
@@ -32,7 +32,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
         [Fact]
-        public async void BodyLoggerMiddleware_should_not_log_request_body_if_downstream_exception_and_disabled()
+        public async Task BodyLoggerMiddleware_should_not_log_request_body_if_downstream_exception_and_disabled()
         {
             // Arrange
             var telemetryWriter = new Mock<ITelemetryWriter>();
@@ -76,7 +76,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
         [Fact]
-        public async void BodyLoggerMiddleware_should_log_request_body_if_downstream_exception_and_enabled()
+        public async Task BodyLoggerMiddleware_should_log_request_body_if_downstream_exception_and_enabled()
         {
             // Arrange
             var telemetryWriter = new Mock<ITelemetryWriter>();
@@ -120,7 +120,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
         [Fact]
-        public async void BodyLoggerMiddleware_should_send_data_to_AppInsights()
+        public async Task BodyLoggerMiddleware_should_send_data_to_AppInsights()
         {
             // Arrange
             var telemetryWriter = new Mock<ITelemetryWriter>();
@@ -164,7 +164,7 @@ namespace ApplicationInsightsRequestLoggingTests
         ///     because the original stream was never returned.
         /// </summary>
         [Fact]
-        public async void BodyLoggerMiddleware_should_not_send_data_to_AppInsights_when_status_code_is_not_of_interest()
+        public async Task BodyLoggerMiddleware_should_not_send_data_to_AppInsights_when_status_code_is_not_of_interest()
         {
             // Arrange
             var telemetryWriter = new Mock<ITelemetryWriter>();
@@ -206,7 +206,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
         [Fact]
-        public async void BodyLoggerMiddleware_should_leave_body_intact()
+        public async Task BodyLoggerMiddleware_should_leave_body_intact()
         {
             // Arrange            
             using var host = await new HostBuilder()
@@ -243,7 +243,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
         [Fact]
-        public async void BodyLoggerMiddleware_should_redact_password()
+        public async Task BodyLoggerMiddleware_should_redact_password()
         {
             // Arrange
             var telemetryWriter = new Mock<ITelemetryWriter>();
@@ -287,7 +287,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
         [Fact]
-        public async void BodyLoggerMiddleware_should_properly_pass()
+        public async Task BodyLoggerMiddleware_should_properly_pass()
         {
             // Arrange            
             using var host = await new HostBuilder()
@@ -320,7 +320,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
         [Fact]
-        public async void BodyLoggerMiddleware_should_disable_ip_masking()
+        public async Task BodyLoggerMiddleware_should_disable_ip_masking()
         {
             // Arrange            
             using var host = await new HostBuilder()
