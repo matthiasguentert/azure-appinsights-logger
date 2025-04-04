@@ -380,7 +380,7 @@ namespace ApplicationInsightsRequestLoggingTests
         }
 
 		[Fact]
-		public async void BodyLoggerMiddleware_should_not_log_request_body_if_excluded_content_type()
+		public async Task BodyLoggerMiddleware_should_not_log_request_body_if_excluded_content_type()
         {
 			// Arrange
 			var telemetryWriter = new Mock<ITelemetryWriter>();
