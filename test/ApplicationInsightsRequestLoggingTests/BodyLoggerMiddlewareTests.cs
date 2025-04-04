@@ -378,5 +378,48 @@ namespace ApplicationInsightsRequestLoggingTests
             requestItem.Should().NotBeNull();
             requestItem?.Properties["ClientIp"].Should().Be("127.168.1.32");
         }
-    }
+
+		[Fact]
+		public async void BodyLoggerMiddleware_should_not_log_request_body_if_excluded_content_type()
+        {
+			// Arrange
+			var telemetryWriter = new Mock<ITelemetryWriter>();
+
+			using var host = await new HostBuilder()
+				.ConfigureWebHost(webBuilder => 
+                {
+					webBuilder
+						.UseTestServer()
+						.ConfigureServices(services => 
+                        {
+							services.AddOptions<BodyLoggerOptions>().Configure(options => 
+                            {
+                                options.ExcludedContentTypes = new List<string> { "multipart/form-data" };
+							});
+							services.AddTransient<IBodyReader, BodyReader>();
+							services.AddTransient<ISensitiveDataFilter, SensitiveDataFilter>();
+							services.AddSingleton(telemetryWriter.Object);
+							services.AddTransient<BodyLoggerMiddleware>();
+						})
+						.Configure(app =>
+                        {
+							app.UseMiddleware<BodyLoggerMiddleware>();
+						});
+				})
+				.StartAsync();
+
+			// Act
+			try 
+            {
+				await host.GetTestClient().PostAsync("/", new StringContent("Hello from client", encoding: null, mediaType: "multipart/form-data"));
+			}
+            catch(Exception)
+            {
+				//ignore errors thrown by test client
+			}
+
+			// Assert
+			telemetryWriter.VerifyNoOtherCalls();
+		}
+	}
 }
