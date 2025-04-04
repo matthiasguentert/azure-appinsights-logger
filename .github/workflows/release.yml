@@ -32,7 +32,7 @@ jobs:
         run: dotnet build -c Release
           
       - name: Test
-        run: dotnet test -c Release --no-build -l trx --verbosity=normal --results-directory "${{ env.ARTIFACT_PATH }}"
+        run: dotnet test -c Release --no-build -l trx --verbosity=normal
 
       - name: Pack
         run: dotnet pack -c Release -o ${{ env.ARTIFACT_PATH }} --no-build
